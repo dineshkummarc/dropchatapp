@@ -36,7 +36,7 @@ class RoomInit(webapp2.RequestHandler):
 
         # Get some recent message if there are any
         messages = []
-        q = model.Message.query(ancestor=room.key).fetch(10)
+        q = model.Message.query(ancestor=room.key).order(-model.Message.timestamp).fetch(10)
         for msg in q:
             messages.append({
                 'author': msg.author.nickname(),

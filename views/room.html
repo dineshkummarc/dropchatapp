@@ -2,13 +2,23 @@
     <div class="col col-lg-8">
         <div class="panel">
             <div class="panel-heading">
-                Room: {{ params.alias }}
+                <span id="brand_room_logo" class="pull-left"></span> Room: {{ params.alias }}
             </div>
 
-            <form class="form-horizontal" ng-submit="send()">
+            <form class="form-horizontal" id="form_message" ng-submit="send()">
                 <div class="row">
                     <div class="col col-sm-10">
-                        <textarea ng-disabled="ready" rows="2" ng-model="message" placeholder="write a message"></textarea>
+                        <textarea ng-disabled="ready" id="message" rows="2" ng-model="message" placeholder="write a message"></textarea>
+                        <script>
+                            $('#message').focus();
+                            $('#message').bind('keydown', function(e) {
+                                if (e.which == 13) {
+                                    $scope = angular.element('#message').scope();
+                                    $scope.send();
+                                    $scope.$apply();
+                                }
+                            });
+                        </script>
                     </div>
                     <div class="col col-sm-2">
                         <button ng-disabled="ready" type="submit" class="pull-right btn btn-primary">Send</button>

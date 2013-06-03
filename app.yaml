@@ -14,6 +14,10 @@ handlers:
   static_dir: views
   login: required
 
+- url: /themes
+  static_dir: themes
+  login: required
+
 - url: /api/.*
   script: api.app
   login: required

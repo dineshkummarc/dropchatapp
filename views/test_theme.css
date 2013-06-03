@@ -1,0 +1,15 @@
+span#brand_logo {
+    background-image: url('http://cdn.nerdsonsite.com/public/logos/nos_redback_167-100.png');
+    width: 167px;
+    height: 100px;
+    display: block;
+    float: left;
+}
+
+span#brand_room_logo {
+    background-image: url('http://cdn.nerdsonsite.com/public/logos/nos_redback_050-030.png');
+    width: 50px;
+    height: 30px;
+    display: block;
+    margin-right: 0.4em;
+}
