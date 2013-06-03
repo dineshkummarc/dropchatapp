@@ -43,8 +43,9 @@
                 Participants
             </div>
             <p ng-repeat="member in participants">
-                <button class="btn btn-small btn-default" ng-click="remove('{{member.email}}')"><span class="glyphicon glyphicon-remove"></span></button>
+                <img src="http://www.gravatar.com/avatar/{{ member.hash }}?s=24">
                 {{member.nickname}}
+                <button class="pull-right btn btn-small btn-default" ng-click="remove('{{member.email}}')"><span class="glyphicon glyphicon-remove"></span></button>
             </p>
             <p><strong>Invite to Room</strong><br>
             <form ng-submit="invite()">

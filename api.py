@@ -5,6 +5,7 @@ import webapp2
 import json
 import logging
 import datetime
+import hashlib
 
 
 class RoomInit(webapp2.RequestHandler):
@@ -31,7 +32,8 @@ class RoomInit(webapp2.RequestHandler):
         for member in room.member:
             participants.append({
                 'nickname': member.nickname(),
-                'email': member.email()
+                'email': member.email(),
+                'hash': hashlib.md5(member.email()).hexdigest()
             })
 
         # Get some recent message if there are any
@@ -107,7 +109,8 @@ class RoomInvite(webapp2.RequestHandler):
 
         self.response.out.write(json.dumps({
             'nickname': new_user.nickname(),
-            'email': new_user.email()
+            'email': new_user.email(),
+            'hash': hashlib.md5(new_user.email()).hexdigest()
         }))
 
 
