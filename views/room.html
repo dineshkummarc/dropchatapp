@@ -1,0 +1,46 @@
+<div class="container">
+    <div class="col col-lg-8">
+        <div class="panel">
+            <div class="panel-heading">
+                Room: {{ params.alias }}
+            </div>
+
+            <form class="form-horizontal" ng-submit="send()">
+                <div class="row">
+                    <div class="col col-sm-10">
+                        <textarea ng-disabled="ready" rows="2" ng-model="message" placeholder="write a message"></textarea>
+                    </div>
+                    <div class="col col-sm-2">
+                        <button ng-disabled="ready" type="submit" class="pull-right btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </form>
+
+            <hr>
+
+            <div class="well" ng-repeat="msg in messages | orderBy:timestamp:reverse">
+                <strong>{{ msg.author }}</strong>
+                {{ msg.message }}
+                <br><small class="timestamp">{{ msg.timestamp }}</small>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col col-lg-4">
+        <div class="panel">
+            <div class="panel-heading">
+                Participants
+            </div>
+            <p ng-repeat="member in participants">
+                <button class="btn btn-small btn-default" ng-click="remove('{{member.email}}')"><span class="glyphicon glyphicon-remove"></span></button>
+                {{member.nickname}}
+            </p>
+            <p><strong>Invite to Room</strong><br>
+            <form ng-submit="invite()">
+                <input type="email" ng-model="email" placeholder="email address">
+            </form>
+            </p>
+        </div>
+    </div>
+</div>

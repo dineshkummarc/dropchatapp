@@ -1,0 +1,28 @@
+application: dropchatapp
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /app.js
+  static_files: app.js
+  upload: app.js
+  login: required
+
+- url: /views
+  static_dir: views
+  login: required
+
+- url: /api/.*
+  script: api.app
+  login: required
+
+- url: /
+  static_files: app.html
+  upload: app.html
+  login: required
+
+libraries:
+- name: webapp2
+  version: "latest"

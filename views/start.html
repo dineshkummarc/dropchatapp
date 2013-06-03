@@ -1,0 +1,28 @@
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="jumbotron">
+                <h1>Start a Drop Chat</h1>
+                <p>Create a room, and meet there.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col col-lg-12">
+            <form ng-submit="Start()">
+                <div class="control-group">
+                    <div class="controls">
+                        <div class="input-group">
+                            <input type="text" ng-model="alias" ng-keyup="check_alias()" placeholder="enter a room alias">
+                            <span class="input-group-addon">
+                                <span style="color: darkgreen;" class="glyphicon glyphicon-ok" ng-show="valid_alias"></span>
+                                <span style="color: red;" class="glyphicon glyphicon-ban-circle" ng-hide="valid_alias"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
