@@ -29,10 +29,17 @@
 
             <hr>
 
-            <div class="well" ng-repeat="msg in messages | orderBy:timestamp:reverse">
-                <strong>{{ msg.author }}</strong>
-                {{ msg.message }}
-                <br><small class="timestamp">{{ msg.timestamp }}</small>
+            <div class="row well" ng-repeat="msg in messages">
+                <div class="media">
+                    <a href="#" class="pull-left">
+                        <img class="media-object" src="http://www.gravatar.com/avatar/{{ member.hash }}?s=50&d=mm">
+                    </a>
+                    <div class="media-body">
+                        <h5 class="media-heading">{{ msg.author }}</h5>
+                        {{ msg.message }}
+                        <br><small class="timestamp">{{ msg.timestamp }}</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -44,7 +51,7 @@
                 Participants
             </div>
             <p ng-repeat="member in participants">
-                <img src="http://www.gravatar.com/avatar/{{ member.hash }}?s=24">
+                <img src="http://www.gravatar.com/avatar/{{ member.hash }}?s=24&d=mm">
                 {{member.nickname}}
                 <button class="pull-right btn btn-small btn-default" ng-click="remove('{{member.email}}')"><span class="glyphicon glyphicon-remove"></span></button>
             </p>
