@@ -50,7 +50,8 @@ class RoomInit(webapp2.RequestHandler):
             'alias': room_alias,
             'participants': participants,
             'messages': messages,
-            'token': channel.create_channel(user.user_id())
+            'token': channel.create_channel(user.user_id()),
+            'author': user.nickname()
         }))
 
 

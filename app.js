@@ -40,7 +40,13 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
     $scope.ready = true;
     $scope.participants = [];
     $scope.messages = [];
-    console.log('Checking for room access...');
+    $scope.notifications = false;
+    $scope.author = '';
+
+    // Check if desktop notifications are enabled
+    if (window.webkitNotifications.checkPermission() == 0) {
+        $scope.notifications = true;
+    }
 
     $http({
         url: '/api/room/init',
@@ -51,6 +57,7 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
             console.log("Room initialized OK");
             $scope.participants = data.participants;
             $scope.messages = data.messages;
+            $scope.author = data.author;
             channel = new goog.appengine.Channel(data.token);
             socket = channel.open();
             socket.onopen = $scope.onOpened;
@@ -64,6 +71,10 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
 
     $scope.params = $routeParams;
 
+    $scope.enableNotifications = function () {
+        window.webkitNotifications.requestPermission();
+        $scope.notifications = true;
+    }
 
     $scope.send = function () {
         $scope.ready = true;
@@ -130,6 +141,18 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
         console.log('Received a message');
         data = JSON.parse(message.data);
         $scope.messages.unshift(data);
+
+        // Send notification if enabled
+        if ($scope.author != data['author']) {
+            if (window.webkitNotifications) {
+                if ($scope.notifications) {
+                    msg_notification = window.webkitNotifications.createNotification(
+                        'icon.png', 'New Message from ' + data['author'], data['message']);
+                    msg_notification.show();
+                }
+            }
+        }
+
         $scope.$apply();
     }
     $scope.onError = function () {
