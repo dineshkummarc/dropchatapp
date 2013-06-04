@@ -43,7 +43,8 @@ class RoomInit(webapp2.RequestHandler):
             messages.append({
                 'author': msg.author.nickname(),
                 'message': msg.text,
-                'timestamp': msg.timestamp.strftime("%m/%d/%Y %H:%M:%S UTC")
+                'timestamp': msg.timestamp.strftime("%m/%d/%Y %H:%M:%S UTC"),
+                'hash': hashlib.md5(msg.author.email()).hexdigest()
             })
 
         self.response.out.write(json.dumps({
@@ -75,7 +76,8 @@ class Message(webapp2.RequestHandler):
         message_data = json.dumps({
             'author': user.nickname(),
             'timestamp': datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S UTC"),
-            'message': data['message']
+            'message': data['message'],
+            'hash': hashlib.md5(user.email()).hexdigest()
         })
         for member in room.member:
             logging.info('Sending message to %s' % member.user_id())
