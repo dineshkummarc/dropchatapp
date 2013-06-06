@@ -31,10 +31,14 @@
             <hr>
 
             <div class="row" ng-repeat="msg in messages">
-                <div class="alert alert-dropchat" style="margin: 0.2em 0.5em 0.2em 0.5em;">
-                    <img class="pull-left" style="margin-right: 0.5em;" src="http://www.gravatar.com/avatar/{{ msg.hash }}?s=40&d=mm">
-                    <strong>{{msg.author}}</strong><span style="font-style: italic;"> wrote:</span> {{msg.message}}<br>
-                    <small class="timestamp">{{ msg.timestamp | date:'medium' }}</small>
+                <div style="margin: 0.2em 0.5em 0.2em 0.5em;">
+                    <div class="col col-1">
+                        <img src="http://www.gravatar.com/avatar/{{ msg.hash }}?s=60&d=mm">
+                    </div>
+                    <div class="col col-11 alert alert-dropchat">
+                        <span class="text-muted"><strong>{{msg.author}}</strong><span style="font-style: italic;"> wrote:</span></span> {{msg.message}}<br>
+                        <small class="timestamp" style="font-style: italic;">{{ msg.timestamp | date:'medium' }}</small>
+                    </div>
                 </div>
             </div>
         </div>
