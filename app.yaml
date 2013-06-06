@@ -5,6 +5,10 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /favicon.ico
+  static_files: images/favicon.ico
+  upload: images/favicon.ico
+
 - url: /app.js
   static_files: app.js
   upload: app.js
@@ -20,6 +24,10 @@ handlers:
 
 - url: /css
   static_dir: css
+  login: required
+
+- url: /images
+  static_dir: images
   login: required
 
 - url: /themes
