@@ -14,6 +14,14 @@ handlers:
   static_dir: views
   login: required
 
+- url: /js
+  static_dir: js
+  login: required
+
+- url: /css
+  static_dir: css
+  login: required
+
 - url: /themes
   static_dir: themes
   login: required

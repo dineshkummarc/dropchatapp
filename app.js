@@ -77,6 +77,10 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
     }
 
     $scope.send = function () {
+        if ($scope.message == '') {
+            return true;
+        }
+
         $scope.ready = true;
         $http({
             url: '/api/message',

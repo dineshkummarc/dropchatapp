@@ -38,12 +38,12 @@ class RoomInit(webapp2.RequestHandler):
 
         # Get some recent message if there are any
         messages = []
-        q = model.Message.query(ancestor=room.key).order(-model.Message.timestamp).fetch(10)
+        q = model.Message.query(ancestor=room.key).order(-model.Message.timestamp).fetch(25)
         for msg in q:
             messages.append({
                 'author': msg.author.nickname(),
                 'message': msg.text,
-                'timestamp': msg.timestamp.strftime("%m/%d/%Y %H:%M:%S UTC"),
+                'timestamp': msg.timestamp.strftime("%Y%m%dT%H%M%SZ%Z"),
                 'hash': hashlib.md5(msg.author.email()).hexdigest()
             })
 
@@ -75,7 +75,7 @@ class Message(webapp2.RequestHandler):
 
         message_data = json.dumps({
             'author': user.nickname(),
-            'timestamp': datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S UTC"),
+            'timestamp': datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ%Z"),
             'message': data['message'],
             'hash': hashlib.md5(user.email()).hexdigest()
         })
