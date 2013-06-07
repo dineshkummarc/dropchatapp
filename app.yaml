@@ -38,6 +38,9 @@ handlers:
   script: api.app
   login: required
 
+- url: /_ah/channel/.*
+  script: api.app
+
 - url: /
   static_files: app.html
   upload: app.html
@@ -46,3 +49,6 @@ handlers:
 libraries:
 - name: webapp2
   version: "latest"
+
+inbound_services:
+- channel_presence

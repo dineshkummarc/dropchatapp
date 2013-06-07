@@ -1,5 +1,6 @@
 from google.appengine.api import users
 from google.appengine.api import channel
+from google.appengine.api import memcache
 import model
 import webapp2
 import json
@@ -11,7 +12,7 @@ import hashlib
 class RoomInit(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
-        room_alias = self.request.get('alias')
+        room_alias = self.request.get('alias').lower()
 
         # First check if room with alias exists
         q = model.Room.query(model.Room.alias == room_alias)
@@ -31,6 +32,7 @@ class RoomInit(webapp2.RequestHandler):
         participants = []
         for member in room.member:
             participants.append({
+                'status': memcache.get(member.user_id() + room_alias),
                 'nickname': member.nickname(),
                 'email': member.email(),
                 'hash': hashlib.md5(member.email()).hexdigest()
@@ -51,7 +53,7 @@ class RoomInit(webapp2.RequestHandler):
             'alias': room_alias,
             'participants': participants,
             'messages': messages,
-            'token': channel.create_channel(user.user_id()),
+            'token': channel.create_channel(user.user_id() + room_alias),
             'author': user.nickname()
         }))
 
@@ -81,7 +83,7 @@ class Message(webapp2.RequestHandler):
         })
         for member in room.member:
             logging.info('Sending message to %s' % member.user_id())
-            channel.send_message(member.user_id(), message_data)
+            channel.send_message(member.user_id() + data['alias'], message_data)
 
         message = model.Message(parent=room.key)
         message.text = data['message']
@@ -141,9 +143,54 @@ class RoomRemove(webapp2.RequestHandler):
         self.response.out.write(json.dumps('OK'))
 
 
+class RoomStatus(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+
+        data = self.request.GET
+        q = model.Room.query(model.Room.alias == data['alias'])
+        if q.count() != 1:
+            logging.error('No room found with alias: %s', data['alias'])
+            self.abort(400)
+        room = q.get()
+
+        # Check if user has access to room
+        if user not in room.member:
+            logging.error('Access to room %s denied for %s' % (data['alias'], user.nickname()))
+            self.abort(403)
+
+        # Return status of all participants
+        status = []
+        for member in room.member:
+            status.append({
+                'status': memcache.get(member.user_id() + data['alias']),
+                'nickname': member.nickname(),
+                'email': member.email(),
+                'hash': hashlib.md5(member.email()).hexdigest()
+            })
+        self.response.out.write(json.dumps(status))
+
+
+class ChannelConnected(webapp2.RequestHandler):
+    def post(self):
+        client_id = self.request.get('from')
+        logging.info('%s is connected' % client_id)
+        memcache.set(client_id, True)
+
+
+class ChannelDisconnected(webapp2.RequestHandler):
+    def post(self):
+        client_id = self.request.get('from')
+        logging.info('%s is disconnected' % client_id)
+        memcache.set(client_id, None)
+
+
 app = webapp2.WSGIApplication([
                                           ('/api/room/init', RoomInit),
+                                          ('/api/room/status', RoomStatus),
                                           ('/api/message', Message),
                                           ('/api/room/invite', RoomInvite),
-                                          ('/api/room/remove', RoomRemove)
+                                          ('/api/room/remove', RoomRemove),
+                                          ('/_ah/channel/connected/', ChannelConnected),
+                                          ('/_ah/channel/disconnected/', ChannelDisconnected)
 ], debug=True)

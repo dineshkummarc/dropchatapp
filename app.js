@@ -36,23 +36,26 @@ function StartCtrl($scope, $location) {
     }
 }
 
-function RoomCtrl($scope, $routeParams, $http, $location) {
+function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
     $scope.ready = true;
     $scope.participants = [];
     $scope.messages = [];
     $scope.notifications = false;
     $scope.author = '';
+    $scope.alias = $routeParams.alias.toLowerCase();
 
     // Check if desktop notifications are enabled
     if (window.webkitNotifications.checkPermission() == 0) {
         $scope.notifications = true;
     }
 
-    $http({
+
+    $scope.init = function() {
+        $http({
         url: '/api/room/init',
         method: 'GET',
         params: {
-            'alias': $routeParams.alias
+            'alias': $scope.alias
         }}).success(function (data) {
             console.log("Room initialized OK");
             $scope.participants = data.participants;
@@ -64,10 +67,14 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
             socket.onmessage = $scope.onMessage;
             socket.onerror = $scope.onError;
             socket.onclose = $scope.onClose;
+
+            $scope.roomStatus();
         }).error(function () {
             console.log('Error when trying to initialize room.');
             $location.path('/denied');
         });
+    };
+    $scope.init();
 
     $scope.params = $routeParams;
 
@@ -87,7 +94,7 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
             method: 'POST',
             data: {
                 'message': $scope.message,
-                'alias': $routeParams.alias
+                'alias': $scope.alias
             }
         }).success(function (data) {
                 console.log('Message added OK.');
@@ -105,7 +112,7 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
             method: 'POST',
             data: {
                 'email': $scope.email,
-                'alias': $routeParams.alias
+                'alias': $scope.alias
             }
         }).success(function (data) {
                 $scope.participants.push(data);
@@ -121,7 +128,7 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
             method: 'POST',
             data: {
                 'email': email,
-                'alias': $routeParams.alias
+                'alias': $scope.alias
             }
         }).success(function () {
                 new_participants = [];
@@ -151,20 +158,43 @@ function RoomCtrl($scope, $routeParams, $http, $location) {
             if (window.webkitNotifications) {
                 if ($scope.notifications) {
                     msg_notification = window.webkitNotifications.createNotification(
-                        'icon.png', 'New Message from ' + data['author'], data['message']);
+                        '/images/icon.png', 'New Message from ' + data['author'], data['message']);
                     msg_notification.show();
                 }
             }
         }
 
         $scope.$apply();
+
+        $scope.roomStatus();
     }
     $scope.onError = function () {
-        console.log('Error with socket connection.')
+        console.log('Error with socket connection.');
+        $scope.init();
+
+        $scope.roomStatus();
     }
     $scope.onClose = function () {
         console.log('Socket has been closed.');
         $scope.ready = true;
         $scope.$apply();
+        $scope.init();
+
+        $scope.roomStatus();
     }
+
+    $scope.roomStatus = function () {
+        $http({
+        url: '/api/room/status',
+        method: 'GET',
+        params: {
+            'alias': $scope.alias
+        }}).success(function (data) {
+                $scope.participants = data;
+        }).error(function () {
+            console.log('Error when trying to get participant status.');
+        });
+    };
+
+    $timeout($scope.roomStatus, 1000);
 }

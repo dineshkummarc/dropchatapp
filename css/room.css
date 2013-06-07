@@ -3,3 +3,7 @@ div.alert-dropchat {
     background-color: #f2f4f8;
     border-color: #d4d4d4;
 }
+
+.online {
+    border-bottom: 3px solid green;
+}

@@ -52,7 +52,8 @@
             </div>
             <p ng-repeat="member in participants">
                 <img src="http://www.gravatar.com/avatar/{{ member.hash }}?s=24&d=mm">
-                {{member.nickname}}
+                <span class="online" ng-show="member.status">{{member.nickname}}</span>
+                <span ng-hide="member.status">{{member.nickname}}</span>
                 <button class="pull-right btn btn-small btn-default" ng-click="remove('{{member.email}}')"><span class="glyphicon glyphicon-remove"></span></button>
             </p>
             <p><strong>Invite to Room</strong><br>
