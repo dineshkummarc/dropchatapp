@@ -54,7 +54,7 @@ class RoomInit(webapp2.RequestHandler):
             'alias': room_alias,
             'participants': participants,
             'messages': messages,
-            'token': channel.create_channel(user.user_id() + room_alias),
+            'token': channel.create_channel("%s_%s" % (user.user_id(), room_alias)),
             'author': user.nickname()
         }))
 
@@ -77,6 +77,7 @@ class Message(webapp2.RequestHandler):
             self.abort(403)
 
         message_data = json.dumps({
+            'type': 'message',
             'author': user.nickname(),
             'timestamp': datetime.datetime.now().strftime("%Y%m%dT%H%M%SZ%Z"),
             'message': data['message'],
@@ -84,7 +85,7 @@ class Message(webapp2.RequestHandler):
         })
         for member in room.member:
             logging.info('Sending message to %s' % member.user_id())
-            channel.send_message(member.user_id() + data['alias'], message_data)
+            channel.send_message("%s_%s" % (member.user_id(), data['alias']), message_data)
 
         message = model.Message(parent=room.key)
         message.text = data['message']
@@ -148,41 +149,35 @@ class RoomRemove(webapp2.RequestHandler):
         self.response.out.write(json.dumps('OK'))
 
 
-class RoomStatus(webapp2.RequestHandler):
-    def get(self):
-        user = users.get_current_user()
-
-        data = self.request.GET
-        q = model.Room.query(model.Room.alias == data['alias'])
-        if q.count() != 1:
-            logging.error('No room found with alias: %s', data['alias'])
-            self.abort(400)
-        room = q.get()
-
-        # Check if user has access to room
-        if user not in room.member:
-            logging.error('Access to room %s denied for %s' % (data['alias'], user.nickname()))
-            self.abort(403)
-
-        # Return status of all participants
-        status = []
-        for member in room.member:
-            status.append({
-                'status': memcache.get(member.user_id() + data['alias']),
-                'nickname': member.nickname(),
-                'email': member.email(),
-                'hash': hashlib.md5(member.email()).hexdigest()
-            })
-
-        self.response.headers['Content-Type'] = 'application/json'
-        self.response.out.write(json.dumps(status))
-
-
 class ChannelConnected(webapp2.RequestHandler):
     def post(self):
         client_id = self.request.get('from')
         logging.info('%s is connected' % client_id)
         memcache.set(client_id, True)
+
+        # Send updated information to room
+        id_str = client_id.split('_')
+        room_alias = id_str[1]
+
+        q = model.Room.query(model.Room.alias == room_alias)
+        if q.count() != 1:
+            logging.info('Did not find room alias "%s" from client_id' % room_alias)
+            self.abort(200)
+        room = q.get()
+
+        status = []
+        for member in room.member:
+            status.append({
+                'status': memcache.get("%s_%s" % (member.user_id(), room_alias)),
+                'nickname': member.nickname(),
+                'email': member.email(),
+                'hash': hashlib.md5(member.email()).hexdigest()
+            })
+        for member in room.member:
+            channel.send_message("%s_%s" % (member.user_id(), room_alias), json.dumps({
+                'type': 'status',
+                'members': status
+            }))
 
 
 class ChannelDisconnected(webapp2.RequestHandler):
@@ -191,10 +186,33 @@ class ChannelDisconnected(webapp2.RequestHandler):
         logging.info('%s is disconnected' % client_id)
         memcache.set(client_id, None)
 
+        # Send updated information to room
+        id_str = client_id.split('_')
+        room_alias = id_str[1]
+
+        q = model.Room.query(model.Room.alias == room_alias)
+        if q.count() != 1:
+            logging.info('Did not find room alias "%s" from client_id' % room_alias)
+            self.abort(200)
+        room = q.get()
+
+        status = []
+        for member in room.member:
+            status.append({
+                'status': memcache.get("%s_%s" % (member.user_id(), room_alias)),
+                'nickname': member.nickname(),
+                'email': member.email(),
+                'hash': hashlib.md5(member.email()).hexdigest()
+            })
+        for member in room.member:
+            channel.send_message("%s_%s" % (member.user_id(), room_alias), json.dumps({
+                'type': 'status',
+                'members': status
+            }))
+
 
 app = webapp2.WSGIApplication([
                                           ('/api/room/init', RoomInit),
-                                          ('/api/room/status', RoomStatus),
                                           ('/api/message', Message),
                                           ('/api/room/invite', RoomInvite),
                                           ('/api/room/remove', RoomRemove),

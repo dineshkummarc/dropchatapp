@@ -62,8 +62,6 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
             socket.onmessage = $scope.onMessage;
             socket.onerror = $scope.onError;
             socket.onclose = $scope.onClose;
-
-            $scope.roomStatus();
         }).error(function () {
             console.log('Error when trying to initialize room.');
             $location.path('/denied');
@@ -172,52 +170,38 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
     $scope.onMessage = function (message) {
         console.log('Received a message');
         data = JSON.parse(message.data);
-        $scope.messages.unshift(data);
 
-        // Send notification if enabled
-        if ($scope.author != data['author']) {
-           if ($scope.notifications) {
-                msg_notification = new Notification('New Message from ' + data['author'], {
-                    body: data['message'],
-                    dir: "auto",
-                    lang: "",
-                    tag: 'message',
-                    icon: '/images/icon.png'
-                });
+        if (data['type'] == 'message') {
+            $scope.messages.unshift(data);
+
+            // Send notification if enabled
+            if ($scope.author != data['author']) {
+               if ($scope.notifications) {
+                    msg_notification = new Notification('New Message from ' + data['author'], {
+                        body: data['message'],
+                        dir: "auto",
+                        lang: "",
+                        tag: 'message',
+                        icon: '/images/icon.png'
+                    });
+                }
             }
         }
 
-        $scope.$apply();
+        if (data['type'] == 'status') {
+            $scope.participants = data['members'];
+        }
 
-        $scope.roomStatus();
+        $scope.$apply();
     }
     $scope.onError = function () {
         console.log('Error with socket connection.');
         $scope.init();
-
-        $scope.roomStatus();
     }
     $scope.onClose = function () {
         console.log('Socket has been closed.');
         $scope.ready = true;
         $scope.$apply();
         $scope.init();
-
-        $scope.roomStatus();
     }
-
-    $scope.roomStatus = function () {
-        console.log('Checking room temperature');
-        $http({
-        url: '/api/room/status',
-        method: 'GET',
-        params: {
-            'alias': $scope.alias
-        }}).success(function (data) {
-                $scope.participants = data;
-                $timeout($scope.roomStatus, 10000);
-        }).error(function () {
-            console.log('Error when trying to get participant status.');
-        });
-    };
 }
