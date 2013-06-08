@@ -41,14 +41,9 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
     $scope.participants = [];
     $scope.messages = [];
     $scope.notifications = false;
+    $scope.supported = true;
     $scope.author = '';
     $scope.alias = $routeParams.alias.toLowerCase();
-
-    // Check if desktop notifications are enabled
-    if (window.webkitNotifications.checkPermission() == 0) {
-        $scope.notifications = true;
-    }
-
 
     $scope.init = function() {
         $http({
@@ -78,10 +73,36 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
 
     $scope.params = $routeParams;
 
+
+    // Check for notification permission
     $scope.enableNotifications = function () {
-        window.webkitNotifications.requestPermission();
-        $scope.notifications = true;
+        Notification.requestPermission(function (perm) {
+            if (perm == 'granted') {
+                $scope.notifications = true;
+            }
+        });
+    };
+
+    try {
+        test_notification = new Notification('You have joined a Drop Chat!', {
+            body: 'You can go ahead and start chatting it up.',
+            dir: "auto",
+            lang: "",
+            tag: 'welcome',
+            icon: '/images/icon.png'
+        });
+        console.log('Seeing: ' + test_notification.permission);
+        if (test_notification.permission == 'granted') {
+            $scope.notifications = true;
+        }
+        // Because the permission variable doesn't seem to get set in Firefox, this does seem to work
+        $scope.enableNotifications();
     }
+    catch (err) {
+        console.log('Does not seem like desktop notifications are implemented');
+        $scope.supported = false;
+    }
+
 
     $scope.send = function () {
         if ($scope.message == '') {
@@ -155,12 +176,14 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
 
         // Send notification if enabled
         if ($scope.author != data['author']) {
-            if (window.webkitNotifications) {
-                if ($scope.notifications) {
-                    msg_notification = window.webkitNotifications.createNotification(
-                        '/images/icon.png', 'New Message from ' + data['author'], data['message']);
-                    msg_notification.show();
-                }
+           if ($scope.notifications) {
+                msg_notification = new Notification('New Message from ' + data['author'], {
+                    body: data['message'],
+                    dir: "auto",
+                    lang: "",
+                    tag: 'message',
+                    icon: '/images/icon.png'
+                });
             }
         }
 
@@ -184,6 +207,7 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
     }
 
     $scope.roomStatus = function () {
+        console.log('Checking room temperature');
         $http({
         url: '/api/room/status',
         method: 'GET',
@@ -191,10 +215,9 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
             'alias': $scope.alias
         }}).success(function (data) {
                 $scope.participants = data;
+                $timeout($scope.roomStatus, 10000);
         }).error(function () {
             console.log('Error when trying to get participant status.');
         });
     };
-
-    $timeout($scope.roomStatus, 1000);
 }

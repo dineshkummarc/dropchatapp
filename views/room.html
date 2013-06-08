@@ -3,7 +3,12 @@
         <div class="panel">
             <div class="panel-heading">
                 <span id="brand_room_logo" class="pull-left"></span> Room: {{ params.alias }}
-                <button ng-hide="notifications" ng-click="enableNotifications()" class="btn btn-small btn-success pull-right">Enable Desktop Notifications</button>
+                <span ng-show="supported">
+                    <button ng-hide="notifications" ng-click="enableNotifications()" class="btn btn-small btn-success pull-right">Enable Desktop Notifications</button>
+                </span>
+                <span ng-hide="supported" class="text-warning pull-right">
+                    Browser not supported. Please <a href="http://www.google.com/chrome">upgrade</a>.
+                </span>
             </div>
 
             <form class="form-horizontal" id="form_message" ng-submit="send()">

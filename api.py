@@ -49,6 +49,7 @@ class RoomInit(webapp2.RequestHandler):
                 'hash': hashlib.md5(msg.author.email()).hexdigest()
             })
 
+        self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps({
             'alias': room_alias,
             'participants': participants,
@@ -90,6 +91,8 @@ class Message(webapp2.RequestHandler):
         message.author = user
         message.put()
 
+        self.response.headers['Content-Type'] = 'application/json'
+
 
 class RoomInvite(webapp2.RequestHandler):
     def post(self):
@@ -112,6 +115,7 @@ class RoomInvite(webapp2.RequestHandler):
         room.member.append(new_user)
         room.put()
 
+        self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps({
             'nickname': new_user.nickname(),
             'email': new_user.email(),
@@ -140,6 +144,7 @@ class RoomRemove(webapp2.RequestHandler):
         room.member.remove(new_user)
         room.put()
 
+        self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps('OK'))
 
 
@@ -168,6 +173,8 @@ class RoomStatus(webapp2.RequestHandler):
                 'email': member.email(),
                 'hash': hashlib.md5(member.email()).hexdigest()
             })
+
+        self.response.headers['Content-Type'] = 'application/json'
         self.response.out.write(json.dumps(status))
 
 
