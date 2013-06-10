@@ -44,6 +44,7 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
     $scope.supported = true;
     $scope.author = '';
     $scope.alias = $routeParams.alias.toLowerCase();
+    $scope.logout_url = '';
 
     $scope.init = function() {
         $http({
@@ -56,6 +57,7 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
             $scope.participants = data.participants;
             $scope.messages = data.messages;
             $scope.author = data.author;
+            $scope.logout_url = data.logout_url;
             channel = new goog.appengine.Channel(data.token);
             socket = channel.open();
             socket.onopen = $scope.onOpened;

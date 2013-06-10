@@ -55,7 +55,8 @@ class RoomInit(webapp2.RequestHandler):
             'participants': participants,
             'messages': messages,
             'token': channel.create_channel("%s_%s" % (user.user_id(), room_alias)),
-            'author': user.nickname()
+            'author': user.nickname(),
+            'logout_url': users.create_logout_url('/')
         }))
 
 

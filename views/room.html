@@ -54,6 +54,7 @@
         <div class="panel">
             <div class="panel-heading">
                 Participants
+                <a href="{{logout_url}}" class="btn btn-small btn-info pull-right">Sign Out <span class="glyphicon glyphicon-user"></span></a>
             </div>
             <p ng-repeat="member in participants">
                 <img src="http://www.gravatar.com/avatar/{{ member.hash }}?s=24&d=mm">
