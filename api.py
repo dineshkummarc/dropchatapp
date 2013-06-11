@@ -32,7 +32,7 @@ class RoomInit(webapp2.RequestHandler):
         participants = []
         for member in room.member:
             participants.append({
-                'status': memcache.get(member.user_id() + room_alias),
+                'status': memcache.get("%s_%s" % (member.user_id(), room_alias)),
                 'nickname': member.nickname(),
                 'email': member.email(),
                 'hash': hashlib.md5(member.email()).hexdigest()
@@ -54,7 +54,7 @@ class RoomInit(webapp2.RequestHandler):
             'alias': room_alias,
             'participants': participants,
             'messages': messages,
-            'token': channel.create_channel("%s_%s" % (user.user_id(), room_alias)),
+            'token': channel.create_channel("%s_%s" % (user.user_id(), room_alias), 720),
             'author': user.nickname(),
             'logout_url': users.create_logout_url('/')
         }))

@@ -198,6 +198,8 @@ function RoomCtrl($scope, $routeParams, $http, $location, $timeout) {
     }
     $scope.onError = function () {
         console.log('Error with socket connection.');
+        $scope.ready = true;
+        $scope.$apply();
         $scope.init();
     }
     $scope.onClose = function () {
