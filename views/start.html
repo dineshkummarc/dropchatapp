@@ -14,7 +14,7 @@
                 <div class="control-group">
                     <div class="controls">
                         <div class="input-group">
-                            <input type="text" ng-model="alias" ng-keyup="check_alias()" placeholder="enter a room alias">
+                            <input type="text" autocapitalize="off" autocorrect="off" ng-model="alias" ng-keyup="check_alias()" placeholder="enter a room alias and press enter">
                             <span class="input-group-addon">
                                 <span style="color: darkgreen;" class="glyphicon glyphicon-ok" ng-show="valid_alias"></span>
                                 <span style="color: red;" class="glyphicon glyphicon-ban-circle" ng-hide="valid_alias"></span>
@@ -28,4 +28,6 @@
             </form>
         </div>
     </div>
+
+    <a href="https://github.com/artooro/dropchatapp"><img style="position: absolute; top: 0; right: 0; border: 0; width: 149px; height: 149px;" src="http://aral.github.com/fork-me-on-github-retina-ribbons/right-orange@2x.png" alt="Fork me on GitHub"></a>
 </div>
